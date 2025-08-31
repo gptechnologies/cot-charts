@@ -5,13 +5,7 @@ import dynamic from 'next/dynamic';
 import { COTData } from '@/lib/data_loader';
 import { format } from 'date-fns';
 
-// Type declaration for react-plotly.js
-declare module 'react-plotly.js' {
-  const Plot: React.ComponentType<any>;
-  export default Plot;
-}
-
-const Plot = dynamic(() => import('react-plotly.js'), { 
+const Plot = dynamic(() => import('react-plotly.js') as any, { 
   ssr: false,
   loading: () => <div className="flex justify-center items-center h-96">Loading chart...</div>
 });
