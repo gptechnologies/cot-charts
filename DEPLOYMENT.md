@@ -53,7 +53,7 @@ If you want to use a different data source, you can set an environment variable:
 2. Navigate to Settings > Environment Variables
 3. Add:
    - **Name**: `NEXT_PUBLIC_DATA_URL`
-   - **Value**: `https://raw.githubusercontent.com/gptechnologies/COTData/refs/heads/main/cot.csv`
+   - **Value**: `https://raw.githubusercontent.com/gptechnologies/cotdata/refs/heads/main/cot.csv`
    - **Environment**: Production (and Preview if desired)
 
 ## Step 4: Verify Deployment
