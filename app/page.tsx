@@ -5,7 +5,7 @@ import { loadDataFrame, COTData } from '@/lib/data_loader';
 import COTChart from '@/components/cot_chart';
 import { format } from 'date-fns';
 
-const DEFAULT_DATA_URL = 'https://raw.githubusercontent.com/gptechnologies/cotdata/refs/heads/main/cot.csv';
+const DEFAULT_DATA_URL = 'https://raw.githubusercontent.com/gptechnologies/COTData/refs/heads/main/cot.csv';
 
 export default function Home() {
   const [data, setData] = useState<COTData[]>([]);
