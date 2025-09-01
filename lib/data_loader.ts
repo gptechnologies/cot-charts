@@ -33,7 +33,7 @@ export async function loadDataFrame(url: string): Promise<COTData[]> {
         header: true,
         dynamicTyping: true,
         skipEmptyLines: true,
-        complete: (results) => {
+        complete: (results: Papa.ParseResult<any>) => {
           try {
             const data = results.data as any[];
             
@@ -123,8 +123,8 @@ export async function loadDataFrame(url: string): Promise<COTData[]> {
             });
             
             resolve(processedData);
-          } catch (error) {
-            reject(error);
+          } catch (err: any) {
+            reject(err);
           }
         },
         error: (err: any) => {
@@ -132,7 +132,7 @@ export async function loadDataFrame(url: string): Promise<COTData[]> {
         }
       });
     });
-  } catch (error) {
-    throw new Error(`Failed to load data: ${error}`);
+  } catch (err: any) {
+    throw new Error(`Failed to load data: ${String(err)}`);
   }
 }
