@@ -97,9 +97,9 @@ export async function loadDataFrame(url: string): Promise<COTData[]> {
             }
             
             // Sort by date within each symbol group and calculate deltas if not provided
-            for (const [symbol, records] of symbolGroups) {
+            symbolGroups.forEach((records, symbol) => {
               records.sort((a, b) => a.date.getTime() - b.date.getTime());
-              
+
               // Calculate deltas if not provided in data
               if (!dlong_col || !dshrt_col) {
                 for (let i = 1; i < records.length; i++) {
@@ -110,9 +110,9 @@ export async function loadDataFrame(url: string): Promise<COTData[]> {
                   curr.d_net = curr.d_long - curr.d_short;
                 }
               }
-              
+
               processedData.push(...records);
-            }
+            });
             
             // Final sort by symbol and date
             processedData.sort((a, b) => {
