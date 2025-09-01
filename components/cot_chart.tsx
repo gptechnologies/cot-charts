@@ -3,9 +3,8 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { COTData } from '@/lib/data_loader';
-import { format } from 'date-fns';
 
-const Plot = dynamic(() => import('react-plotly.js') as any, { 
+const Plot = dynamic(() => import('react-plotly.js'), { 
   ssr: false,
   loading: () => <div className="flex justify-center items-center h-96">Loading chart...</div>
 });
