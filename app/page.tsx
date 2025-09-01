@@ -32,12 +32,20 @@ export default function Home() {
             setSelectedSymbol(symbols[0]);
           }
           
-          // Set default date range to the most recent date
-          const dates = loadedData.map(d => d.date).sort((a, b) => b.getTime() - a.getTime());
-          const latestDate = dates[0];
-          const dateStr = format(latestDate, 'yyyy-MM-dd');
-          setStartDate(dateStr);
-          setEndDate(dateStr);
+          // Set default date range: Start = 1 year ago (clamped to dataset min), End = today
+          const datesDesc = loadedData.map(d => d.date).sort((a, b) => b.getTime() - a.getTime());
+          const latestDataDate = datesDesc[0];
+          const earliestDataDate = datesDesc[datesDesc.length - 1];
+
+          const today = new Date();
+          const oneYearAgo = new Date(today);
+          oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+          const defaultStart = oneYearAgo < earliestDataDate ? earliestDataDate : oneYearAgo;
+          const defaultEnd = today;
+
+          setStartDate(format(defaultStart, 'yyyy-MM-dd'));
+          setEndDate(format(defaultEnd, 'yyyy-MM-dd'));
         }
       })
       .catch((err) => {
@@ -58,9 +66,11 @@ export default function Home() {
     if (data.length === 0) return { min: '', max: '' };
     
     const dates = data.map(d => d.date).sort((a, b) => a.getTime() - b.getTime());
+    const today = new Date();
     return {
       min: format(dates[0], 'yyyy-MM-dd'),
-      max: format(dates[dates.length - 1], 'yyyy-MM-dd')
+      // Allow selecting today even if data hasn't updated yet
+      max: format(today, 'yyyy-MM-dd')
     };
   }, [data]);
 
