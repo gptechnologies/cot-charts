@@ -127,8 +127,8 @@ export async function loadDataFrame(url: string): Promise<COTData[]> {
             reject(error);
           }
         },
-        error: (error) => {
-          reject(error);
+        error: (err: any) => {
+          reject(err);
         }
       });
     });
