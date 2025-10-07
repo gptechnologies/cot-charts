@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { loadDataFrame, COTData } from '@/lib/data_loader';
 import COTChart from '../components/cot_chart';
+import DateInput from '../components/DateInput';
 import { format } from 'date-fns';
 
 const DEFAULT_DATA_URL = 'https://raw.githubusercontent.com/gptechnologies/COTData/refs/heads/main/cot.csv';
@@ -155,49 +156,23 @@ export default function Home() {
           <div className="md:col-span-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Start Date
-                </label>
-                <input
-                  type="date"
+                <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
+                <DateInput
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  onFocus={() => {
-                    // Clear current value to let user type freely;
-                    // remember previous to restore if left empty on blur.
-                    prevStartRef.current = startDate;
-                    if (startDate) setStartDate('');
-                  }}
-                  onBlur={(e) => {
-                    if (!e.target.value) {
-                      setStartDate(prevStartRef.current);
-                    }
-                  }}
+                  onChange={setStartDate}
                   min={dateRange.min}
                   max={dateRange.max}
-                  className="input-field w-full"
+                  ariaLabel="Start date"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  End Date
-                </label>
-                <input
-                  type="date"
+                <label className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
+                <DateInput
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  onFocus={() => {
-                    prevEndRef.current = endDate;
-                    if (endDate) setEndDate('');
-                  }}
-                  onBlur={(e) => {
-                    if (!e.target.value) {
-                      setEndDate(prevEndRef.current);
-                    }
-                  }}
+                  onChange={setEndDate}
                   min={dateRange.min}
                   max={dateRange.max}
-                  className="input-field w-full"
+                  ariaLabel="End date"
                 />
               </div>
             </div>
