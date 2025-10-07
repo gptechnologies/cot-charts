@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { loadDataFrame, COTData } from '@/lib/data_loader';
 import COTChart from '../components/cot_chart';
 import { format } from 'date-fns';
@@ -15,6 +15,8 @@ export default function Home() {
   const [showNet, setShowNet] = useState(false);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const prevStartRef = useRef<string>('');
+  const prevEndRef = useRef<string>('');
 
   // Load data on component mount
   useEffect(() => {
@@ -160,6 +162,17 @@ export default function Home() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
+                  onFocus={() => {
+                    // Clear current value to let user type freely;
+                    // remember previous to restore if left empty on blur.
+                    prevStartRef.current = startDate;
+                    if (startDate) setStartDate('');
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value) {
+                      setStartDate(prevStartRef.current);
+                    }
+                  }}
                   min={dateRange.min}
                   max={dateRange.max}
                   className="input-field w-full"
@@ -173,6 +186,15 @@ export default function Home() {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
+                  onFocus={() => {
+                    prevEndRef.current = endDate;
+                    if (endDate) setEndDate('');
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value) {
+                      setEndDate(prevEndRef.current);
+                    }
+                  }}
                   min={dateRange.min}
                   max={dateRange.max}
                   className="input-field w-full"
