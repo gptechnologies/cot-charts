@@ -85,7 +85,9 @@ export default function DateInput({ value, onChange, min, max, inputClassName = 
 
   const years: number[] = useMemo(() => {
     const start = (minDate ?? new Date(1990, 0, 1)).getFullYear();
-    const end = (maxDate ?? new Date().setFullYear(new Date().getFullYear() + 5) && new Date()).getFullYear();
+    const fallbackEnd = new Date();
+    fallbackEnd.setFullYear(fallbackEnd.getFullYear() + 5);
+    const end = (maxDate ?? fallbackEnd).getFullYear();
     const list: number[] = [];
     for (let y = start; y <= end; y++) list.push(y);
     return list;
@@ -203,4 +205,3 @@ export default function DateInput({ value, onChange, min, max, inputClassName = 
     </div>
   );
 }
-
