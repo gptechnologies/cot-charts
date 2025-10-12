@@ -46,6 +46,23 @@ body {
   box-shadow: 0 0 0 1px #10b981;
 }
 
+.input-field[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.input-field[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  opacity: 0;
+  -webkit-appearance: none;
+}
+
+.input-field[type="date"]::-webkit-inner-spin-button,
+.input-field[type="date"]::-webkit-clear-button {
+  display: none;
+}
+
 .select-field {
   background-color: #1f2937;
   border: 1px solid #374151;
