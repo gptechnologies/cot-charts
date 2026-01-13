@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { loadDataFrame, COTData } from '@/lib/data_loader';
 import COTChart from '../components/cot_chart';
 import DateInput from '../components/DateInput';
+import SearchableSelect from '../components/SearchableSelect';
 import { format } from 'date-fns';
 
 const DEFAULT_DATA_URL = 'https://raw.githubusercontent.com/gptechnologies/COTData/refs/heads/main/cot.csv';
@@ -29,10 +30,11 @@ export default function Home() {
         setError(null);
         
         if (loadedData.length > 0) {
-          // Set default symbol to first available
+          // Set default symbol to EURO FX if available, otherwise first
           const symbols = Array.from(new Set(loadedData.map(d => d.symbol))).sort();
           if (symbols.length > 0) {
-            setSelectedSymbol(symbols[0]);
+            const euroFx = symbols.find(s => s.toUpperCase() === 'EURO FX');
+            setSelectedSymbol(euroFx || symbols[0]);
           }
           
           // Set default date range: Start = 1 year ago (clamped to dataset min), End = today
@@ -123,17 +125,12 @@ export default function Home() {
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Asset
             </label>
-            <select
+            <SearchableSelect
               value={selectedSymbol}
-              onChange={(e) => setSelectedSymbol(e.target.value)}
-              className="select-field w-full"
-            >
-              {symbols.map(symbol => (
-                <option key={symbol} value={symbol}>
-                  {symbol}
-                </option>
-              ))}
-            </select>
+              options={symbols}
+              onChange={setSelectedSymbol}
+              placeholder="Search assets..."
+            />
             <p className="text-xs text-gray-400 mt-1">
               Type to search and select the asset name.
             </p>
