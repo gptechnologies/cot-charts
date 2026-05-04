@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { loadDataFrame, COTData } from '@/lib/data_loader';
 import COTChart from '../components/cot_chart';
+import FxPositionsTable from '../components/fx_positions_table';
 import DateInput from '../components/DateInput';
 import SearchableSelect from '../components/SearchableSelect';
 import { format } from 'date-fns';
@@ -180,6 +181,9 @@ export default function Home() {
         <div className="bg-slate-800 rounded-lg p-6">
           <COTChart data={filteredData} showNet={showNet} />
         </div>
+
+        {/* FX Positions Table */}
+        <FxPositionsTable data={data} />
 
         {/* Data Info */}
         {filteredData.length > 0 && (
