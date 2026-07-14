@@ -115,12 +115,12 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen p-4">
+    <main className="min-h-screen p-3 sm:p-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-6">COT — Non-Commercial Positions</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">COT — Non-Commercial Positions</h1>
         
         {/* Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 mb-4 sm:mb-6">
           {/* Asset Selection */}
           <div className="md:col-span-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -152,7 +152,7 @@ export default function Home() {
 
           {/* Date Range Controls */}
           <div className="md:col-span-5">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
                 <DateInput
@@ -178,7 +178,7 @@ export default function Home() {
         </div>
 
         {/* Chart */}
-        <div className="bg-slate-800 rounded-lg p-6">
+        <div className="bg-slate-800 rounded-lg p-2 sm:p-6">
           <COTChart data={filteredData} showNet={showNet} />
         </div>
 

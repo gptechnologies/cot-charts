@@ -88,39 +88,39 @@ const FxPositionsTable: React.FC<FxPositionsTableProps> = ({ data }) => {
   if (rows.length === 0) return null;
 
   return (
-    <div className="bg-slate-800 rounded-lg p-6 mt-6">
-      <div className="flex items-baseline justify-between mb-4">
-        <h2 className="text-lg font-semibold text-white">FX Positioning — Non-Commercial</h2>
+    <div className="bg-slate-800 rounded-lg p-4 sm:p-6 mt-4 sm:mt-6">
+      <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-4">
+        <h2 className="text-base sm:text-lg font-semibold text-white">FX Positioning — Non-Commercial</h2>
         {reportDate && (
-          <span className="text-sm text-gray-400">
+          <span className="text-xs sm:text-sm text-gray-400">
             Report: {format(reportDate, 'MMM dd, yyyy')}
           </span>
         )}
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-xs sm:text-sm">
           <thead>
             <tr className="border-b border-slate-700">
-              <th className="text-left text-gray-400 font-medium py-2 pr-4">Currency</th>
-              <th className="text-right text-gray-400 font-medium py-2 px-4">Long</th>
-              <th className="text-right text-gray-400 font-medium py-2 px-4">Short</th>
-              <th className="text-right text-gray-400 font-medium py-2 pl-4">Net</th>
+              <th className="text-left text-gray-400 font-medium py-2 pr-2 sm:pr-4">Currency</th>
+              <th className="text-right text-gray-400 font-medium py-2 px-2 sm:px-4">Long</th>
+              <th className="text-right text-gray-400 font-medium py-2 px-2 sm:px-4">Short</th>
+              <th className="text-right text-gray-400 font-medium py-2 pl-2 sm:pl-4">Net</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.label} className="border-b border-slate-700/50 hover:bg-slate-700/30">
-                <td className="py-3 pr-4 font-medium text-white">{row.label}</td>
-                <td className="py-3 px-4 text-right">
+                <td className="py-2.5 sm:py-3 pr-2 sm:pr-4 font-medium text-white">{row.label}</td>
+                <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-right whitespace-nowrap">
                   <div className="text-white">{fmt.format(row.long)}</div>
                   <ChangeValue value={row.dLong} />
                 </td>
-                <td className="py-3 px-4 text-right">
+                <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-right whitespace-nowrap">
                   <div className="text-white">{fmt.format(row.short)}</div>
                   <ChangeValue value={row.dShort} />
                 </td>
-                <td className="py-3 pl-4 text-right">
+                <td className="py-2.5 sm:py-3 pl-2 sm:pl-4 text-right whitespace-nowrap">
                   <div className={row.net >= 0 ? 'text-emerald-400' : 'text-red-400'}>
                     {fmtSigned.format(row.net)}
                   </div>

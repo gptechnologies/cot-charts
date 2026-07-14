@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { COTData } from '@/lib/data_loader';
 
@@ -14,7 +14,25 @@ interface COTChartProps {
   showNet: boolean;
 }
 
+// Detect small screens so we can lock axes (touch zoom/pan glitches with page
+// scrolling on mobile) and compact the layout.
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  return isMobile;
+}
+
 const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
+  const isMobile = useIsMobile();
+
   if (data.length === 0) {
     return <div className="text-white text-center py-8">No data available for the selected range.</div>;
   }
@@ -22,7 +40,10 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
   // Colors
   const greenColor = "#10b981";   // Longs
   const redColor = "#ef4444";     // Shorts
-  const dateFormat = "%m/%d/%Y";
+  const dateFormat = isMobile ? "%m/%d/%y" : "%m/%d/%Y";
+  const chartHeight = isMobile ? 440 : 600;
+  const axisTitleSize = isMobile ? 11 : undefined;
+  const tickSize = isMobile ? 10 : undefined;
 
   // Prepare data
   const dates = data.map(d => d.date);
@@ -138,7 +159,9 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
   }
 
   const layout = {
-    margin: { l: 50, r: 20, t: 40, b: 40 },
+    margin: isMobile
+      ? { l: 40, r: 10, t: 30, b: 30 }
+      : { l: 50, r: 20, t: 40, b: 40 },
     barmode: 'relative',
     legend: {
       orientation: 'h',
@@ -148,18 +171,21 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
       x: 0,
       bgcolor: 'rgba(0,0,0,0)',
       borderwidth: 0,
-      font: { color: 'white' }
+      font: { color: 'white', size: isMobile ? 11 : 12 }
     },
     hovermode: 'x unified',
     hoverlabel: {
       bgcolor: '#1f2937',
-      font: { size: 12, family: 'sans-serif', color: 'white' },
+      font: { size: isMobile ? 11 : 12, family: 'sans-serif', color: 'white' },
       bordercolor: '#374151'
     },
-    height: 600,
+    height: chartHeight,
     plot_bgcolor: '#0f172a',
     paper_bgcolor: '#0f172a',
     font: { color: 'white' },
+    // Lock axes on mobile: prevents touch-drag zoom/pan from mangling the
+    // scales while scrolling the page.
+    dragmode: isMobile ? false : 'zoom',
     xaxis: {
       domain: [0, 1],
       anchor: 'y2',
@@ -168,28 +194,34 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
       gridwidth: 1,
       gridcolor: '#334155',
       linecolor: '#475569',
-      tickfont: { color: 'white' },
-      title: { text: 'Week', font: { color: 'white' } }
+      tickfont: { color: 'white', size: tickSize },
+      nticks: isMobile ? 6 : undefined,
+      fixedrange: isMobile,
+      title: isMobile
+        ? undefined
+        : { text: 'Week', font: { color: 'white' } }
     },
     yaxis: {
       domain: [0.35, 1],
       anchor: 'x',
-      title: { text: 'Contracts', font: { color: 'white' } },
+      title: { text: 'Contracts', font: { color: 'white', size: axisTitleSize } },
       showgrid: true,
       gridwidth: 1,
       gridcolor: '#334155',
       linecolor: '#475569',
-      tickfont: { color: 'white' }
+      tickfont: { color: 'white', size: tickSize },
+      fixedrange: isMobile
     },
     yaxis2: {
       domain: [0, 0.3],
       anchor: 'x',
-      title: { text: 'Weekly Change', font: { color: 'white' } },
+      title: { text: 'Weekly Change', font: { color: 'white', size: axisTitleSize } },
       showgrid: true,
       gridwidth: 1,
       gridcolor: '#334155',
       linecolor: '#475569',
-      tickfont: { color: 'white' }
+      tickfont: { color: 'white', size: tickSize },
+      fixedrange: isMobile
     },
     shapes: showNet ? [
       // Zero line for positions (if showing net)
@@ -238,7 +270,7 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
         xanchor: 'left',
         yanchor: 'top',
         showarrow: false,
-        font: { color: 'white', size: 14 }
+        font: { color: 'white', size: isMobile ? 12 : 14 }
       },
       {
         text: 'Weekly Changes',
@@ -249,14 +281,17 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
         xanchor: 'left',
         yanchor: 'top',
         showarrow: false,
-        font: { color: 'white', size: 14 }
+        font: { color: 'white', size: isMobile ? 12 : 14 }
       }
     ]
   };
 
   const config = {
-    displayModeBar: true,
+    // Hide the modebar on mobile (zoom/pan tools are disabled there anyway)
+    displayModeBar: !isMobile,
     displaylogo: false,
+    scrollZoom: false,
+    responsive: true,
     modeBarButtonsToRemove: [
       'pan2d',
       'select2d',
@@ -269,13 +304,15 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
   };
 
   return (
-    <div className="w-full">
+    // touch-action pan-y lets vertical swipes over the chart scroll the page
+    // instead of being captured by Plotly's touch handlers.
+    <div className="w-full" style={{ touchAction: 'pan-y' }}>
       <Plot
         data={plotData}
         layout={layout}
         config={config}
         useResizeHandler
-        style={{ width: '100%', height: '600px' }}
+        style={{ width: '100%', height: `${chartHeight}px` }}
       />
     </div>
   );
