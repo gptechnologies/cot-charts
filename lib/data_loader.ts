@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import { parseISO } from 'date-fns';
 
 export interface COTData {
   date: Date;
@@ -69,8 +70,8 @@ export async function loadDataFrame(url: string): Promise<COTData[]> {
             for (const row of data) {
               if (!row[date_col] || !row[sym_col]) continue;
               
-              const dateStr = row[date_col];
-              const date = new Date(dateStr);
+              const dateStr = String(row[date_col]).trim();
+              const date = parseISO(dateStr);
               if (isNaN(date.getTime())) continue;
               
               const symbol = String(row[sym_col]).trim();

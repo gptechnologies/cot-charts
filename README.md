@@ -52,6 +52,9 @@ npm run dev
 - `NEXT_PUBLIC_DATA_URL`: URL to the CSV file containing COT data
   - Default: `https://raw.githubusercontent.com/gptechnologies/COTData/refs/heads/main/cot.csv`
   - Must be publicly accessible CSV with proper CORS headers
+- `NEXT_PUBLIC_POLICY_RATES_URL`: URL to the CSV file containing current policy rates
+  - Default: `https://raw.githubusercontent.com/gptechnologies/COTData/refs/heads/main/policy_rates.csv`
+  - Optional when using the default COTData repository
 
 ## Data Format
 

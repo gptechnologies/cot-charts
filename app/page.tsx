@@ -2,18 +2,22 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { loadDataFrame, COTData } from '@/lib/data_loader';
+import { loadPolicyRates, PolicyRate } from '@/lib/policy_rates';
 import COTChart from '../components/cot_chart';
 import FxPositionsTable from '../components/fx_positions_table';
 import DateInput from '../components/DateInput';
 import SearchableSelect from '../components/SearchableSelect';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 const DEFAULT_DATA_URL = 'https://raw.githubusercontent.com/gptechnologies/COTData/refs/heads/main/cot.csv';
+const DEFAULT_POLICY_RATES_URL = 'https://raw.githubusercontent.com/gptechnologies/COTData/refs/heads/main/policy_rates.csv';
 
 export default function Home() {
   const [data, setData] = useState<COTData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [policyRates, setPolicyRates] = useState<PolicyRate[]>([]);
+  const [policyRatesError, setPolicyRatesError] = useState<string | null>(null);
   const [selectedSymbol, setSelectedSymbol] = useState<string>('');
   const [showNet, setShowNet] = useState(false);
   const [startDate, setStartDate] = useState<string>('');
@@ -62,6 +66,20 @@ export default function Home() {
       });
   }, []);
 
+  // Policy rates load independently so an upstream outage never blocks COT data.
+  useEffect(() => {
+    const ratesUrl = process.env.NEXT_PUBLIC_POLICY_RATES_URL || DEFAULT_POLICY_RATES_URL;
+
+    loadPolicyRates(ratesUrl)
+      .then((loadedRates) => {
+        setPolicyRates(loadedRates);
+        setPolicyRatesError(null);
+      })
+      .catch((err) => {
+        setPolicyRatesError(err instanceof Error ? err.message : String(err));
+      });
+  }, []);
+
   // Get unique symbols sorted
   const symbols = useMemo(() => {
     return Array.from(new Set(data.map(d => d.symbol))).sort();
@@ -84,8 +102,8 @@ export default function Home() {
   const filteredData = useMemo(() => {
     if (!selectedSymbol || !startDate || !endDate) return [];
     
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
     
     // Ensure start <= end
     const actualStart = start <= end ? start : end;
@@ -183,7 +201,11 @@ export default function Home() {
         </div>
 
         {/* FX Positions Table */}
-        <FxPositionsTable data={data} />
+        <FxPositionsTable
+          data={data}
+          policyRates={policyRates}
+          policyRatesError={policyRatesError}
+        />
 
         {/* Data Info */}
         {filteredData.length > 0 && (
