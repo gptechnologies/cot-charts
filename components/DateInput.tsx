@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
+  id?: string;
   value: string; // yyyy-MM-dd
   onChange: (v: string) => void;
   min?: string; // yyyy-MM-dd
@@ -10,6 +11,7 @@ type Props = {
   inputClassName?: string;
   buttonClassName?: string;
   ariaLabel?: string;
+  alignCalendar?: "left" | "right";
 };
 
 function parseYMD(s?: string): Date | null {
@@ -48,7 +50,11 @@ const monthNames = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-export default function DateInput({ value, onChange, min, max, inputClassName = "input-field w-full", buttonClassName = "", ariaLabel }: Props) {
+export default function DateInput({
+  id, value, onChange, min, max,
+  inputClassName = "input-field h-10 w-full min-w-0 !px-1.5 text-sm tabular-nums sm:!px-2",
+  buttonClassName = "", ariaLabel, alignCalendar = "left",
+}: Props) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -111,8 +117,9 @@ export default function DateInput({ value, onChange, min, max, inputClassName = 
 
   return (
     <div className="relative" ref={containerRef}>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-1.5">
         <input
+          id={id}
           ref={inputRef}
           type="date"
           value={value}
@@ -133,8 +140,9 @@ export default function DateInput({ value, onChange, min, max, inputClassName = 
         />
         <button
           type="button"
-          aria-label="Open calendar"
-          className={`p-2 rounded bg-slate-700 hover:bg-slate-600 text-gray-200 border border-slate-600 ${buttonClassName}`}
+          aria-label={ariaLabel ? `Open ${ariaLabel.toLowerCase()} calendar` : "Open calendar"}
+          aria-expanded={open}
+          className={`grid h-10 w-9 shrink-0 place-items-center rounded bg-slate-700 hover:bg-slate-600 text-gray-200 border border-slate-600 sm:w-10 ${buttonClassName}`}
           onClick={() => setOpen((v) => !v)}
         >
           {/* Calendar icon (inline SVG) */}
@@ -145,7 +153,7 @@ export default function DateInput({ value, onChange, min, max, inputClassName = 
       </div>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-72 rounded border border-slate-600 bg-slate-800 shadow-lg p-3 text-gray-200">
+        <div className={`absolute top-full z-50 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded border border-slate-600 bg-slate-800 shadow-lg p-3 text-gray-200 ${alignCalendar === "right" ? "right-0" : "left-0 md:left-auto md:right-0"}`}>
           <div className="flex items-center gap-2 mb-3">
             <select
               className="select-field text-sm"

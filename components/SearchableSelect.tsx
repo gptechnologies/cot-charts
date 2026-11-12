@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 interface SearchableSelectProps {
+  id?: string;
   value: string;
   options: string[];
   onChange: (value: string) => void;
@@ -10,6 +11,7 @@ interface SearchableSelectProps {
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
+  id,
   value,
   options,
   onChange,
@@ -65,6 +67,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   return (
     <div ref={containerRef} className="relative w-full">
       <input
+        id={id}
         ref={inputRef}
         type="text"
         value={isOpen ? searchTerm : value}
@@ -72,7 +75,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         onFocus={handleInputFocus}
         onKeyDown={handleKeyDown}
         placeholder={isOpen ? placeholder : value || placeholder}
-        className="input-field w-full cursor-pointer"
+        className="input-field h-10 w-full cursor-pointer !pr-9"
         autoComplete="off"
       />
       

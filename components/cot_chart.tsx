@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { COTData } from '@/lib/data_loader';
 
@@ -13,6 +13,9 @@ interface COTChartProps {
   data: COTData[];
   showNet: boolean;
 }
+
+const guideColor = '#94a3b8';
+const guideWidth = 1.5;
 
 // Detect small screens so we can lock axes (touch zoom/pan glitches with page
 // scrolling on mobile) and compact the layout.
@@ -32,6 +35,32 @@ function useIsMobile(): boolean {
 
 const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
   const isMobile = useIsMobile();
+  const cursorGuide = useRef<SVGLineElement>(null);
+
+  function hideCursorGuide() {
+    cursorGuide.current?.setAttribute('visibility', 'hidden');
+  }
+
+  function moveCursorGuide(event: React.PointerEvent<HTMLDivElement>) {
+    const line = cursorGuide.current;
+    if (!line) return;
+
+    // Plotly's drag rectangles mark the actual plotting area of each panel.
+    const panel = event.target instanceof Element && event.target.closest('rect.nsewdrag');
+    if (!panel || event.buttons !== 0 || event.pointerType === 'touch') {
+      hideCursorGuide();
+      return;
+    }
+
+    const bounds = panel.getBoundingClientRect();
+    const origin = event.currentTarget.getBoundingClientRect();
+    const y = String(event.clientY - origin.top);
+    line.setAttribute('x1', String(bounds.left - origin.left));
+    line.setAttribute('x2', String(bounds.right - origin.left));
+    line.setAttribute('y1', y);
+    line.setAttribute('y2', y);
+    line.setAttribute('visibility', 'visible');
+  }
 
   if (data.length === 0) {
     return <div className="text-white text-center py-8">No data available for the selected range.</div>;
@@ -41,9 +70,19 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
   const greenColor = "#10b981";   // Longs
   const redColor = "#ef4444";     // Shorts
   const dateFormat = isMobile ? "%m/%d/%y" : "%m/%d/%Y";
-  const chartHeight = isMobile ? 440 : 600;
+  const chartHeight = isMobile ? 460 : 600;
   const axisTitleSize = isMobile ? 11 : undefined;
   const tickSize = isMobile ? 10 : undefined;
+  const axisStyle = {
+    showgrid: false,
+    showline: true,
+    linecolor: '#64748b',
+    ticks: 'outside',
+    ticklen: isMobile ? 3 : 5,
+    tickcolor: '#64748b',
+    tickfont: { color: '#e2e8f0', size: tickSize },
+    fixedrange: isMobile
+  };
 
   // Prepare data
   const dates = data.map(d => d.date);
@@ -160,15 +199,15 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
 
   const layout = {
     margin: isMobile
-      ? { l: 40, r: 10, t: 30, b: 30 }
-      : { l: 50, r: 20, t: 40, b: 40 },
+      ? { l: 52, r: 12, t: 60, b: 34 }
+      : { l: 68, r: 24, t: 48, b: 48 },
     barmode: 'relative',
     legend: {
       orientation: 'h',
       yanchor: 'bottom',
-      y: 1.02,
-      xanchor: 'left',
-      x: 0,
+      y: isMobile ? 1.012 : 1.025,
+      xanchor: isMobile ? 'left' : 'right',
+      x: isMobile ? 0 : 0.78,
       bgcolor: 'rgba(0,0,0,0)',
       borderwidth: 0,
       font: { color: 'white', size: isMobile ? 11 : 12 }
@@ -181,107 +220,64 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
     },
     height: chartHeight,
     plot_bgcolor: '#0f172a',
-    paper_bgcolor: '#0f172a',
+    paper_bgcolor: 'rgba(0,0,0,0)',
     font: { color: 'white' },
     // Lock axes on mobile: prevents touch-drag zoom/pan from mangling the
     // scales while scrolling the page.
     dragmode: isMobile ? false : 'zoom',
     xaxis: {
+      ...axisStyle,
       domain: [0, 1],
       anchor: 'y2',
+      spikecolor: guideColor,
+      spikethickness: guideWidth,
+      spikedash: 'dot',
+      spikesnap: 'hovered data',
       tickformat: dateFormat,
-      showgrid: true,
-      gridwidth: 1,
-      gridcolor: '#334155',
-      linecolor: '#475569',
-      tickfont: { color: 'white', size: tickSize },
-      nticks: isMobile ? 6 : undefined,
-      fixedrange: isMobile,
+      nticks: isMobile ? 4 : undefined,
       title: isMobile
         ? undefined
         : { text: 'Week', font: { color: 'white' } }
     },
     yaxis: {
-      domain: [0.35, 1],
+      ...axisStyle,
+      domain: [0.47, 1],
       anchor: 'x',
       title: { text: 'Contracts', font: { color: 'white', size: axisTitleSize } },
-      showgrid: true,
-      gridwidth: 1,
-      gridcolor: '#334155',
-      linecolor: '#475569',
-      tickfont: { color: 'white', size: tickSize },
-      fixedrange: isMobile
+      zeroline: showNet,
+      zerolinecolor: '#475569'
     },
     yaxis2: {
-      domain: [0, 0.3],
+      ...axisStyle,
+      domain: [0, 0.33],
       anchor: 'x',
       title: { text: 'Weekly Change', font: { color: 'white', size: axisTitleSize } },
-      showgrid: true,
-      gridwidth: 1,
-      gridcolor: '#334155',
-      linecolor: '#475569',
-      tickfont: { color: 'white', size: tickSize },
-      fixedrange: isMobile
+      nticks: 8,
+      zeroline: true,
+      zerolinecolor: '#94a3b8'
     },
-    shapes: showNet ? [
-      // Zero line for positions (if showing net)
-      {
-        type: 'line',
-        xref: 'paper',
-        x0: 0,
-        x1: 1,
-        yref: 'y',
-        y0: 0,
-        y1: 0,
-        line: { color: '#475569', width: 1, dash: 'dot' },
-        opacity: 0.5
-      },
-      // Zero line for changes
-      {
-        type: 'line',
-        xref: 'paper',
-        x0: 0,
-        x1: 1,
-        yref: 'y2',
-        y0: 0,
-        y1: 0,
-        line: { color: '#475569', width: 1 }
-      }
-    ] : [
-      // Zero line for changes only
-      {
-        type: 'line',
-        xref: 'paper',
-        x0: 0,
-        x1: 1,
-        yref: 'y2',
-        y0: 0,
-        y1: 0,
-        line: { color: '#475569', width: 1 }
-      }
-    ],
     annotations: [
       {
-        text: 'Positions',
+        text: '<b>Positions</b>',
         xref: 'paper',
         yref: 'paper',
-        x: 0.02,
-        y: 0.98,
+        x: 0,
+        y: isMobile ? 1.085 : 1.025,
         xanchor: 'left',
-        yanchor: 'top',
+        yanchor: 'bottom',
         showarrow: false,
-        font: { color: 'white', size: isMobile ? 12 : 14 }
+        font: { color: 'white', size: isMobile ? 13 : 16 }
       },
       {
-        text: 'Weekly Changes',
+        text: '<b>Δ Positions</b>',
         xref: 'paper',
         yref: 'paper',
-        x: 0.02,
-        y: 0.32,
+        x: 0,
+        y: 0.355,
         xanchor: 'left',
-        yanchor: 'top',
+        yanchor: 'bottom',
         showarrow: false,
-        font: { color: 'white', size: isMobile ? 12 : 14 }
+        font: { color: 'white', size: isMobile ? 13 : 16 }
       }
     ]
   };
@@ -306,14 +302,31 @@ const COTChart: React.FC<COTChartProps> = ({ data, showNet }) => {
   return (
     // touch-action pan-y lets vertical swipes over the chart scroll the page
     // instead of being captured by Plotly's touch handlers.
-    <div className="w-full" style={{ touchAction: 'pan-y' }}>
+    <div
+      className="relative w-full"
+      style={{ touchAction: 'pan-y' }}
+      onPointerMove={moveCursorGuide}
+      onPointerDownCapture={hideCursorGuide}
+      onPointerLeave={hideCursorGuide}
+      onPointerCancel={hideCursorGuide}
+    >
       <Plot
         data={plotData}
         layout={layout}
         config={config}
         useResizeHandler
+        onRelayout={hideCursorGuide}
         style={{ width: '100%', height: `${chartHeight}px` }}
       />
+      <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full">
+        <line
+          ref={cursorGuide}
+          visibility="hidden"
+          stroke={guideColor}
+          strokeWidth={guideWidth}
+          strokeDasharray="3 3"
+        />
+      </svg>
     </div>
   );
 };

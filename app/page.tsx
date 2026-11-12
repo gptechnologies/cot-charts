@@ -135,65 +135,55 @@ export default function Home() {
   return (
     <main className="min-h-screen p-3 sm:p-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">COT — Non-Commercial Positions</h1>
-        
-        {/* Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          {/* Asset Selection */}
-          <div className="md:col-span-4">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Asset
-            </label>
+        <header className="mb-4 grid grid-cols-2 items-start gap-x-3 gap-y-3 sm:mb-6 sm:gap-x-4 md:grid-cols-[minmax(0,1fr)_10rem_10rem] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_10rem_10rem] lg:gap-x-6">
+          <h1 className="col-span-full text-2xl font-bold text-white lg:col-span-1 lg:mt-6 lg:flex lg:min-h-10 lg:items-center xl:text-3xl">
+            COT — Non-Commercials
+          </h1>
+
+          <div className="col-span-full min-w-0 md:col-span-1">
+            <label htmlFor="asset-selector" className="mb-1 block text-sm font-medium text-gray-300">Asset</label>
             <SearchableSelect
+              id="asset-selector"
               value={selectedSymbol}
               options={symbols}
               onChange={setSelectedSymbol}
               placeholder="Search assets..."
             />
-            <p className="text-xs text-gray-400 mt-1">
-              Type to search and select the asset name.
-            </p>
-          </div>
-
-          {/* Show Net Checkbox */}
-          <div className="md:col-span-3 flex items-end">
-            <label className="flex items-center space-x-2 pb-2">
+            <label className="mt-2 flex w-fit cursor-pointer items-center gap-2 text-sm text-gray-300 md:mx-auto">
               <input
                 type="checkbox"
                 checked={showNet}
                 onChange={(e) => setShowNet(e.target.checked)}
                 className="checkbox-field"
               />
-              <span className="text-gray-300">Show Net Position</span>
+              Show Net Positions
             </label>
           </div>
 
-          {/* Date Range Controls */}
-          <div className="md:col-span-5">
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
-                <DateInput
-                  value={startDate}
-                  onChange={setStartDate}
-                  min={dateRange.min}
-                  max={dateRange.max}
-                  ariaLabel="Start date"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
-                <DateInput
-                  value={endDate}
-                  onChange={setEndDate}
-                  min={dateRange.min}
-                  max={dateRange.max}
-                  ariaLabel="End date"
-                />
-              </div>
-            </div>
+          <div className="w-full min-w-0 max-w-40">
+            <label htmlFor="start-date" className="mb-1 block text-sm font-medium text-gray-300">Start Date</label>
+            <DateInput
+              id="start-date"
+              value={startDate}
+              onChange={setStartDate}
+              min={dateRange.min}
+              max={dateRange.max}
+              ariaLabel="Start date"
+            />
           </div>
-        </div>
+          <div className="w-full min-w-0 max-w-40">
+            <label htmlFor="end-date" className="mb-1 block text-sm font-medium text-gray-300">End Date</label>
+            <DateInput
+              id="end-date"
+              value={endDate}
+              onChange={setEndDate}
+              min={dateRange.min}
+              max={dateRange.max}
+              ariaLabel="End date"
+              alignCalendar="right"
+            />
+          </div>
+        </header>
 
         {/* Chart */}
         <div className="bg-slate-800 rounded-lg p-2 sm:p-6">
